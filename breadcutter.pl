@@ -12,7 +12,6 @@ my $aftemplate        = "aselect='%s', asetpts=N/SR/TB";
 sub ts2seconds {
     map {
         my @hms = split /:/;
-        map { s/\D//gr } @hms;
             $#hms > 2  ? warn "Strange timestamp: @hms"
           : $#hms eq 2 ? $hms[0] * 60 * 60 + $hms[1] * 60 + $hms[2]
           : $#hms eq 1 ? $hms[0] * 60 + $hms[1]
@@ -33,7 +32,9 @@ foreach my $jobdesc (@ARGV) {
             $mediafile = $_;
         } else {
             next if /^\s*(?:#|$)/;
-            my @seconds = ts2seconds split /\s+\D*\s*/;
+            s/[^\d: \n]//g;
+            s/^\s+//;
+            my @seconds = ts2seconds split /\s+/;
             if ( exists $jobdescs{$mediafile} ) {
                 push @{ $jobdescs{$mediafile} }, @seconds;
             } else {
@@ -42,7 +43,6 @@ foreach my $jobdesc (@ARGV) {
         }
     }
     close($fh);
-
     foreach my $mfile ( keys %jobdescs ) {
         my @cmdline;
         for ( my $cnt = 0 ; $cnt < $#{ $jobdescs{$mfile} } ; $cnt += 2 ) {
